@@ -10,6 +10,8 @@ import (
 
 	"github.com/thewhitetulip/Tasks/db"
 	"github.com/thewhitetulip/Tasks/sessions"
+
+	"github.com/DataDog/dd-trace-go/tracer/contrib/gorilla/muxtrace"
 )
 
 var homeTemplate *template.Template
@@ -26,11 +28,13 @@ var err error
 //ShowAllTasksFunc is used to handle the "/" URL which is the default ons
 //TODO add http404 error
 func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
+	span := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method == "GET" {
 		username := sessions.GetCurrentUserName(r)
-		context, err := db.GetTasks(username, "pending", "")
+		context, err := db.GetTasks(ctx, username, "pending", "")
 		log.Println(context)
-		categories := db.GetCategories(username)
+		categories := db.GetCategories(ctx, username)
 		if err != nil {
 			http.Redirect(w, r, "/", http.StatusInternalServerError)
 		} else {

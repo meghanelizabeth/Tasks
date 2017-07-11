@@ -15,6 +15,8 @@ import (
 	"strings"
 	"time"
 
+	"context"
+
 	_ "github.com/mattn/go-sqlite3" //we want to use sqlite natively
 	md "github.com/shurcooL/github_flavored_markdown"
 	"github.com/thewhitetulip/Tasks/types"
@@ -48,7 +50,12 @@ func (db Database) prepare(q string) (stmt *sql.Stmt) {
 	return stmt
 }
 
-func (db Database) query(q string, args ...interface{}) (rows *sql.Rows) {
+func (db Database) query(ctx context.Context, name string, q string, args ...interface{}) (rows *sql.Rows) {
+	if ctx != nil {
+		span, _ := tracer.NewChildSpanWithContext(name, ctx) 	
+		defer span.Finish()
+	}
+	
 	rows, err := db.db.Query(q, args...)
 	if err != nil {
 		log.Println(err)
@@ -72,7 +79,7 @@ func Close() {
 
 //GetTasks retrieves all the tasks depending on the
 //status pending or trashed or completed
-func GetTasks(username, status, category string) (types.Context, error) {
+func GetTasks(ctx context.Context, username, status, category string) (types.Context, error) {
 	log.Println("getting tasks for ", status)
 	var tasks []types.Task
 	var task types.Task
@@ -100,7 +107,7 @@ func GetTasks(username, status, category string) (types.Context, error) {
 
 		getTaskSQL += " order by t.created_date asc"
 
-		rows = database.query(getTaskSQL, username, username)
+		rows = database.query(nil, "database.get-tasks", ctx, fmt.Sprintf("database.get-tasks.%s", category), getTaskSQL, username, username)
 	} else {
 		status = category
 		//This is a special case for showing tasks with null categories, we do a union query
@@ -169,7 +176,7 @@ func GetTaskByID(username string, id int) (types.Context, error) {
 
 	getTaskSQL := "select t.id, t.title, t.content, t.priority, t.hide, c.name from task t join user u left outer join category c  where c.id = t.cat_id and t.user_id=u.id and t.id=? and u.username=? union select t.id, t.title, t.content, t.priority, t.hide, 'UNCATEGORIZED' from task t join user u where t.user_id=u.id and t.cat_id=0 ;"
 
-	rows := database.query(getTaskSQL, id, username)
+	rows := database.query(nil, "database.get-task-by-id", getTaskSQL, id, username)
 	defer rows.Close()
 	if rows.Next() {
 		err := rows.Scan(&task.Id, &task.Title, &task.Content, &task.Priority, &task.IsHidden, &task.Category)
@@ -251,7 +258,7 @@ func GetCategoryIDByName(username string, category string) int {
 	var categoryID int
 	getTaskSQL := "select c.id from category c , user u where u.id = c.user_id and name=? and u.username=?"
 
-	rows := database.query(getTaskSQL, category, username)
+	rows := database.query(nil, "database.get-category-by-id", getTaskSQL, category, username)
 	defer rows.Close()
 	if rows.Next() {
 		err := rows.Scan(&categoryID)
@@ -314,7 +321,7 @@ func SearchTask(username, query string) (types.Context, error) {
 
 	stmt := "select t.id, title, content, created_date, priority, c.name from task t, category c where t.user_id=? and c.id = t.cat_id and (title like '%" + query + "%' or content like '%" + query + "%') order by created_date desc"
 
-	rows := database.query(stmt, userID, query, query)
+	rows := database.query(nil, "database.search-tasks", stmt, userID, query, query)
 	defer rows.Close()
 	for rows.Next() {
 		err := rows.Scan(&task.Id, &task.Title, &task.Content, &TaskCreated, &task.Priority, &task.Category)
@@ -360,7 +367,7 @@ func GetComments(username string) (map[int][]types.Comment, error) {
 		return commentMap, err
 	}
 	stmt := "select c.id, c.taskID, c.content, c.created, u.username from comments c, task t, user u where t.id=c.taskID and c.user_id=t.user_id and t.user_id=u.id and u.id=?"
-	rows := database.query(stmt, userID)
+	rows := database.query(nil, "database.get-comments", stmt, userID)
 
 	defer rows.Close()
 	for rows.Next() {

@@ -24,7 +24,7 @@ func AddFile(fileName, token, username string) error {
 func GetFileName(token string) (string, error) {
 	sql := "select name from files where autoName=?"
 	var fileName string
-	rows := database.query(sql, fileName)
+	rows := database.query(nil, "database.get-file-name", sql, fileName)
 	defer rows.Close()
 	if rows.Next() {
 		err := rows.Scan(&fileName)
@@ -48,7 +48,7 @@ func GetCategories(username string) []types.CategoryCount {
 		return nil
 	}
 	stmt := "select 'UNCATEGORIZED' as name, count(1) from task where cat_id=0 union  select c.name, count(*) from   category c left outer join task t  join status s on  c.id = t.cat_id and t.task_status_id=s.id where s.status!='DELETED' and c.user_id=?   group by name    union     select name, 0  from category c, user u where c.user_id=? and name not in (select distinct name from task t join category c join status s on s.id = t.task_status_id and t.cat_id = c.id and s.status!='DELETED' and c.user_id=?)"
-	rows := database.query(stmt, userID, userID, userID)
+	rows := database.query(nil, "database.get-categories", stmt, userID, userID, userID)
 	var categories []types.CategoryCount
 	var category types.CategoryCount
 
@@ -78,7 +78,7 @@ func AddCategory(username, category string) error {
 // used while inserting tasks into the table
 func GetCategoryByName(username, category string) int {
 	stmt := "select id from category where name=? and user_id = (select id from user where username=?)"
-	rows := database.query(stmt, category, username)
+	rows := database.query(nil, "database.get-category-by-name", stmt, category, username)
 	var categoryID int
 	defer rows.Close()
 	for rows.Next() {

@@ -15,7 +15,7 @@ func ValidUser(username, password string) bool {
 	var passwordFromDB string
 	userSQL := "select password from user where username=?"
 	log.Print("validating user ", username)
-	rows := database.query(userSQL, username)
+	rows := database.query(nil, "database.valid-user", userSQL, username)
 
 	defer rows.Close()
 	if rows.Next() {
@@ -36,7 +36,7 @@ func ValidUser(username, password string) bool {
 func GetUserID(username string) (int, error) {
 	var userID int
 	userSQL := "select id from user where username=?"
-	rows := database.query(userSQL, username)
+	rows := database.query(nil, "database.get-user-id", userSQL, username)
 
 	defer rows.Close()
 	if rows.Next() {

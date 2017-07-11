@@ -14,7 +14,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"fmt"
+	"github.com/DataDog/dd-trace-go/tracer"
 	"context"
 
 	_ "github.com/mattn/go-sqlite3" //we want to use sqlite natively

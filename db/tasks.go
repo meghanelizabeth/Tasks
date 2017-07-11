@@ -108,7 +108,7 @@ func GetTasks(ctx context.Context, username, status, category string) (types.Con
 
 		getTaskSQL += " order by t.created_date asc"
 
-		rows = database.query(nil, "database.get-tasks", ctx, fmt.Sprintf("database.get-tasks.%s", category), getTaskSQL, username, username)
+		rows = database.query(ctx, fmt.Sprintf("database.get-tasks.%s", category), getTaskSQL, username, username)
 	} else {
 		status = category
 		//This is a special case for showing tasks with null categories, we do a union query

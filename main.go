@@ -13,8 +13,8 @@ import (
 	"github.com/DataDog/dd-trace-go/tracer"
 	"github.com/DataDog/dd-trace-go/tracer/contrib/gorilla/muxtrace"
 	"github.com/gorilla/mux"
-	"github.com/thewhitetulip/Tasks/config"
-	"github.com/thewhitetulip/Tasks/views"
+	"github.com/meghanelizabeth/Tasks/config"
+	"github.com/meghanelizabeth/Tasks/views"
 )
 
 func main() {

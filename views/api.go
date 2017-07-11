@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/thewhitetulip/Tasks/db"
-	"github.com/thewhitetulip/Tasks/types"
+	"github.com/meghanelizabeth/Tasks/db"
+	"github.com/meghanelizabeth/Tasks/types"
 )
 
 type MyCustomClaims struct {

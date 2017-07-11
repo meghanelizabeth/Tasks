@@ -13,9 +13,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/thewhitetulip/Tasks/db"
-	"github.com/thewhitetulip/Tasks/sessions"
-	"github.com/thewhitetulip/Tasks/utils"
+	"github.com/meghanelizabeth/Tasks/db"
+	"github.com/meghanelizabeth/Tasks/sessions"
+	"github.com/meghanelizabeth/Tasks/utils"
 )
 
 //PopulateTemplates is used to parse all templates present in

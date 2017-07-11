@@ -18,10 +18,16 @@ import (
 	"github.com/meghanelizabeth/Tasks/db"
 	"github.com/meghanelizabeth/Tasks/sessions"
 	"github.com/meghanelizabeth/Tasks/utils"
+
+	"context"
+	"github.com/DataDog/dd-trace-go/tracer/contrib/gorilla/muxtrace"
 )
 
 // UploadedFileHandler is used to handle the uploaded file related requests
 func UploadedFileHandler(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "GET" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -37,6 +43,9 @@ func UploadedFileHandler(w http.ResponseWriter, r *http.Request) {
 
 //AddTaskFunc is used to handle the addition of new task, "/add" URL
 func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" { // Will work only for POST requests, will redirect to home
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -136,6 +145,9 @@ func AddTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 //AddCategoryFunc used to add new categories to the database
 func AddCategoryFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" { // We respond only to POST requests, redirect to home for others
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -159,6 +171,8 @@ func AddCategoryFunc(w http.ResponseWriter, r *http.Request) {
 
 //EditTaskFunc is used to edit tasks, handles "/edit/" URL
 func EditTaskFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method != "GET" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -173,7 +187,7 @@ func EditTaskFunc(w http.ResponseWriter, r *http.Request) {
 	redirectURL := utils.GetRedirectUrl(r.Referer())
 	username := sessions.GetCurrentUserName(r)
 	task, err := db.GetTaskByID(username, id)
-	categories := db.GetCategories(username)
+	categories := db.GetCategories(ctx, username)
 	task.Categories = categories
 	task.Referer = redirectURL
 
@@ -186,6 +200,9 @@ func EditTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 //AddCommentFunc will be used
 func AddCommentFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" {
 		log.Println(err)
 		http.Redirect(w, r, "/", http.StatusBadRequest)

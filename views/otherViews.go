@@ -16,6 +16,9 @@ import (
 	"github.com/meghanelizabeth/Tasks/db"
 	"github.com/meghanelizabeth/Tasks/sessions"
 	"github.com/meghanelizabeth/Tasks/utils"
+
+	"context"
+	"github.com/DataDog/dd-trace-go/tracer/contrib/gorilla/muxtrace"
 )
 
 //PopulateTemplates is used to parse all templates present in
@@ -56,6 +59,9 @@ func PopulateTemplates() {
 
 //CompleteTaskFunc is used to show the complete tasks, handles "/completed/" url
 func CompleteTaskFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "GET" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -80,6 +86,8 @@ func CompleteTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 //SearchTaskFunc is used to handle the /search/ url, handles the search function
 func SearchTaskFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -93,7 +101,7 @@ func SearchTaskFunc(w http.ResponseWriter, r *http.Request) {
 		log.Println("error fetching search results")
 	}
 
-	categories := db.GetCategories(username)
+	categories := db.GetCategories(ctx, username)
 	context.Categories = categories
 
 	searchTemplate.Execute(w, context)
@@ -102,6 +110,9 @@ func SearchTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTaskFunc is used to update a task, handes "/update/" URL
 func UpdateTaskFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -141,6 +152,9 @@ func UpdateTaskFunc(w http.ResponseWriter, r *http.Request) {
 
 //UpdateCategoryFunc is used to update a task, handes "/upd-category/" URL
 func UpdateCategoryFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return
@@ -166,6 +180,9 @@ func UpdateCategoryFunc(w http.ResponseWriter, r *http.Request) {
 
 //SignUpFunc will enable new users to sign up to our service
 func SignUpFunc(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" {
 		http.Redirect(w, r, "/", http.StatusBadRequest)
 		return

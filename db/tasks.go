@@ -8,19 +8,19 @@ DeleteAll()
 */
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
+	"github.com/DataDog/dd-trace-go/tracer"
 	"html/template"
 	"log"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"github.com/DataDog/dd-trace-go/tracer"
-	"context"
 
 	_ "github.com/mattn/go-sqlite3" //we want to use sqlite natively
-	md "github.com/shurcooL/github_flavored_markdown"
 	"github.com/meghanelizabeth/Tasks/types"
+	md "github.com/shurcooL/github_flavored_markdown"
 )
 
 var database Database
@@ -53,10 +53,10 @@ func (db Database) prepare(q string) (stmt *sql.Stmt) {
 
 func (db Database) query(ctx context.Context, name string, q string, args ...interface{}) (rows *sql.Rows) {
 	if ctx != nil {
-		span, _ := tracer.NewChildSpanWithContext(name, ctx) 	
+		span, _ := tracer.NewChildSpanWithContext(name, ctx)
 		defer span.Finish()
 	}
-	
+
 	rows, err := db.db.Query(q, args...)
 	if err != nil {
 		log.Println(err)

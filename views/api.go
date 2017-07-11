@@ -12,6 +12,9 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/meghanelizabeth/Tasks/db"
 	"github.com/meghanelizabeth/Tasks/types"
+
+	"context"
+	"github.com/DataDog/dd-trace-go/tracer/contrib/gorilla/muxtrace"
 )
 
 type MyCustomClaims struct {
@@ -23,6 +26,9 @@ var mySigningKey = []byte("secret")
 
 //GetTokenHandler will get a token for the username and password
 func GetTokenHandler(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method != "POST" {
 		w.Write([]byte("Method not allowed"))
 		return
@@ -82,6 +88,8 @@ func ValidateToken(myToken string) (bool, string) {
 //in this function we will return all the tasks to the user or tasks per category
 //GET /api/get-tasks/
 func GetTasksFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method == "GET" {
 		var strTaskID string
 		var err error
@@ -112,7 +120,7 @@ func GetTasksFuncAPI(w http.ResponseWriter, r *http.Request) {
 		strTaskID = r.URL.Path[len("/api/get-task/"):]
 		//this is when we get a request for all the tasks for that user
 		if strTaskID == "" {
-			context, err := db.GetTasks(username, "pending", "")
+			context, err := db.GetTasks(ctx, username, "pending", "")
 			if err != nil {
 				message = "GetTasksFuncAPI: api.go: Server error"
 				log.Println(message)
@@ -166,6 +174,9 @@ func GetTasksFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //AddTaskFuncAPI will add the tasks for the user
 func AddTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "POST" {
 		token := r.Header["Token"][0]
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -249,6 +260,9 @@ func AddTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //UpdateTaskFuncAPI will add the tasks for the user
 func UpdateTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "POST" {
 		var taskErr bool
 		token := r.Header["Token"][0]
@@ -329,6 +343,9 @@ func UpdateTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //DeleteTaskFuncAPI will add the tasks for the user
 func DeleteTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "GET" {
 		token := r.Header["Token"][0]
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
@@ -382,6 +399,8 @@ func DeleteTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //GetDeletedTaskFuncAPI will get the deleted tasks for the user
 func GetDeletedTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method == "GET" {
 		var err error
 		var message string
@@ -408,7 +427,7 @@ func GetDeletedTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
 		log.Println("token is valid " + username + " is logged in")
 
 		//this is when we get a request for all the deleted tasks for that user
-		context, err := db.GetTasks(username, "deleted", "")
+		context, err := db.GetTasks(ctx, username, "deleted", "")
 		if err != nil {
 			message = "GetTasksFuncAPI: api.go: Server error"
 			log.Println(message)
@@ -436,6 +455,8 @@ func GetDeletedTaskFuncAPI(w http.ResponseWriter, r *http.Request) {
 //GetCategoryFuncAPI will return the categories for the user
 //depends on the ID that we get, if we get all, then return all categories of the user
 func GetCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
 	if r.Method == "GET" {
 		var err error
 		var message string
@@ -459,7 +480,7 @@ func GetCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("token is valid " + username + " is logged in")
-		categories := db.GetCategories(username)
+		categories := db.GetCategories(ctx, username)
 		w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
 		w.WriteHeader(http.StatusOK)
@@ -474,6 +495,9 @@ func GetCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //AddCategoryFuncAPI will add the category for the user
 func AddCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "POST" {
 		var err error
 		var message string
@@ -536,6 +560,9 @@ func AddCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //UpdateCategoryFuncAPI will update the category for the user
 func UpdateCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "POST" {
 		var statusCode int
 		var err error
@@ -602,6 +629,9 @@ func UpdateCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
 
 //DeleteCategoryFuncAPI will delete the category for the user
 func DeleteCategoryFuncAPI(w http.ResponseWriter, r *http.Request) {
+	span, _ := muxtrace.GetRequestSpan(r)
+	ctx := span.Context(context.Background())
+	_ = ctx
 	if r.Method == "GET" {
 		categoryName := r.URL.Path[len("/delete-category/"):]
 		categoryName = strings.Trim(categoryName, "/")

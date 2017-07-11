@@ -30,6 +30,8 @@ var err error
 func ShowAllTasksFunc(w http.ResponseWriter, r *http.Request) {
 	span := muxtrace.GetRequestSpan(r)
 	ctx := span.Context(context.Background())
+	log.Printf("span is %s", span)
+	log.Printf("context is %s", ctx)
 	if r.Method == "GET" {
 		username := sessions.GetCurrentUserName(r)
 		context, err := db.GetTasks(ctx, username, "pending", "")
